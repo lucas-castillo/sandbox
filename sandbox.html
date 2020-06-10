@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Trials</title>
+</head>
+<style>
+    label {
+        font-size: 20px;
+    }
+</style>
+<body>
+<canvas id="myCanvas" width="800" height="250" style="border: solid black 2px">
+</canvas>
+<div class="slidecontainer" id="slider">
+    <input onmouseup="animateAgain()" type="range" min="1" max="200" value="100" class="slider" style="width:600px" id="myRange">
+    <button id="nextButton" onclick="newAnimation()" style="display:inline">New Animation</button>
+</div>
+<p style="font-size: 20px"> Change parameters here then press "New Animation" to create a new display. Change the slider value to watch again (and change flash onset if active)</p>
+<label for="mirroring">Direction</label>
+<select id="mirroring">
+    <option value="No">Left to Right</option>
+    <option value="Yes">Right to Left</option>
+</select>
+<label for="timing">Timing</label>
+<select id="timing">
+    <option value="reversed">Reversed</option>
+    <option value="canonical">Canonical</option>
+</select>
+<label for="aHide" style="display: none">Hide A</label>
+<select id="aHide"style="display: none">
+    <option value="No">No</option>
+    <option value="Yes">Yes</option>
+</select>
+<label for="extraObjects">Extra Objects</label>
+<select id="extraObjects">
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+</select>
+<label for="faces" style="display: none">Faces</label>
+<select id="faces" style="display: none">
+    <option value="No">No</option>
+    <option value="Yes">Yes</option>
+</select>
+
+
+<label for="speed"> Speed (default = 0.3)</label>
+<input id="speed" type="number" min="0.1" max="1" step="0.1" value="0.3" style="width: 40px">
+<!--<button onclick="window.location.href = 'training.html'">See "Agentic" Training</button>-->
+
+
+<!--<button onclick="drawRect()">Manually Draw</button>-->
+<br>
+<input id="redC", type="checkbox">
+<label for="redC"> Red Hidden</label>
+<input id="blueC", type="checkbox">
+<label for="blueC"> Blue Hidden</label>
+<input id="purpleC", type="checkbox">
+<label for="purpleC"> Pink Hidden</label>
+<input id="flash", type="checkbox">
+<label for="flash"> ShowFlash</label>
+
+<p style="font-size: 20px"> Change step to manually draw the current display</p>
+<label for="step"> Step </label>
+<input id="step" type="number" min="1" step="1" value="1" onchange="drawRect()">
+<script src="classes.js"></script>
+<script>
+
+    var myCanvas = document.getElementById("myCanvas");
+    var ctx = myCanvas.getContext("2d");
+    newAnimation();
+
+
+    function animateAgain (){
+        for (var i = 0; i < window.myRectangle.animationTimer.length; i++) {
+            clearTimeout(window.myRectangle.animationTimer[i])
+        }
+        window.myRectangle.animationStarted = Infinity;
+        window.myRectangle.animationEnded = false;
+        window.myRectangle.resetSquares();
+        window.myRectangle.draw();
+        window.myRectangle.setTimeouts();
+    }
+
+    function newAnimation () {
+        // set up rectangle
+        var colours, mirroring, timing, targetSync, AHidden, stickAndHole, conditionArray, squareDimensions, speed, canvas, slider, faces;
+
+        // change variables here
+        var AColour, BColour, CColour;
+        AColour = document.getElementById("redC").checked ? "hidden" : "red";
+        BColour = document.getElementById("blueC").checked ? "hidden" : "blue";
+        CColour = document.getElementById("purpleC").checked ? "hidden" : "purple";
+        colours = [AColour, BColour, CColour];
+        mirroring = document.getElementById("mirroring").value === "Yes";
+        timing = document.getElementById("timing").value;
+        targetSync = "B";
+        AHidden = document.getElementById("aHide").value === "Yes";
+        stickAndHole = document.getElementById("extraObjects").value === "Yes";
+        squareDimensions = [50, 50];
+        speed = Number(document.getElementById("speed").value);
+        conditionArray = [timing, targetSync, AHidden, stickAndHole];
+        canvas = document.getElementById("myCanvas");
+        slider = document.getElementById("myRange");
+        faces = document.getElementById("faces").value === "Yes";
+
+        delete window.myRectangle;
+        window.myRectangle = new Animation(colours, mirroring, conditionArray, squareDimensions, canvas, slider, speed, faces);
+        window.myRectangle.showFlash = document.getElementById("flash").checked;
+        animateAgain();
+    }
+
+    function drawRect() {
+
+        ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
+
+        for (var i = 0; i < window.myRectangle.squareList.length; i++) {
+            window.myRectangle.squareList[i].draw(myCanvas, document.getElementById("step").value)
+        }
+        // drawHole
+        if (window.myRectangle.squareList[1].colourName !== "hidden") {
+            ctx.fillStyle = window.myRectangle.holeColour;
+            ctx.fillRect(
+                window.myRectangle.squareList[1].position[0],
+                window.myRectangle.squareList[1].position[1] + 1/3 * window.myRectangle.squareList[1].dimensions[1],
+                window.myRectangle.squareList[1].dimensions[0],
+                1/3* window.myRectangle.squareList[1].dimensions[1]
+            );
+        }
+        if(window.myRectangle.stickAndHole){
+            window.myRectangle.drawObjects();
+        }
+    }
+
+</script>
+</body>
+</html>
